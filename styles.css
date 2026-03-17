@@ -1,0 +1,302 @@
+/*
+     THEME TOKENS
+     Change only this block to retheme the entire page.
+  */
+:root {
+    /* backgrounds */
+    --bg-page: #0f0f11; /* page background */
+    --bg-surface: #1a1a1f; /* stat cards, trial box */
+    --bg-input: #1a1a1f; /* number inputs */
+    --bg-btn-hover: #2a2a32; /* button hover fill */
+    --bg-ui-active: #1d70c3; /* active background for buttons, sliders, and radio pills */
+    /* borders */
+    --border-muted: #2e2e38; /* inputs, buttons, dividers */
+    /* text */
+    --text-primary: #e8e8ec; /* headings, stat values */
+    --text-secondary: #888899; /* labels, legend, speed text */
+    --text-muted: #555566; /* placeholder "press run to start" */
+    --text-body: #a0a0b0; /* description paragraph */
+    --text-on-active: #ecf9ff; /* text on active radio pill */
+    /* data colours */
+    --color-estimate: #1D9E75; /* running-estimate line */
+    --color-pi-line: #E24B4A; /* true-constant dashed line */
+    --color-trial-dot: #378ADD; /* trial x multiplier scatter dots */
+    --color-reset-line: #BA7517; /* dotted reset verticals */
+    --color-pi-value: #1D9E75; /* estimate stat value */
+    --color-true-pi: #E24B4A; /* true-constant stat value */
+    /* coin colours */
+    --coin-h-bg: #0a2b22;
+    --coin-h-text: #5DCAA5;
+    --coin-h-border: #1D9E75;
+    --coin-t-bg: #2b1f08;
+    --coin-t-text: #EF9F27;
+    --coin-t-border: #BA7517;
+    --coin-final-bg: #1D9E75;
+    --coin-final-text: #0a2b22;
+    --coin-final-border: #085041;
+    /* chart internals (hardcoded into Chart.js, kept here for reference) */
+    --chart-grid: #ffffff0f;
+    --chart-tick: #666677;
+    --chart-axis-title: #888899;
+}
+
+
+/* RESET & BASE */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* page */
+body {
+    font-family: system-ui, sans-serif;
+    background: var(--bg-page);
+    color: var(--text-primary);
+    padding: 1.5rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* description text */
+.desc {
+    color: var(--text-body);
+    font-size: 13px;
+    margin-bottom: 1.25rem;
+    line-height: 1.6;
+}
+
+/* links */
+a {
+    color: #9ec3e2;
+}
+
+/* inputs */
+input[type=number], input[type=range] {
+    font-family: inherit;
+    font-size: 13px;
+}
+
+input[type=number] {
+    border: 0.5px solid var(--border-muted);
+    border-radius: 6px;
+    padding: 4px 6px;
+    background: var(--bg-input);
+    color: var(--text-primary);
+}
+
+input[type=range], input[type=checkbox] {
+    accent-color: var(--bg-ui-active);
+}
+
+/* buttons */
+button {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 5px 12px;
+    border: 0.5px solid var(--border-muted);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background .15s;
+}
+
+    button:hover {
+        background: var(--bg-btn-hover);
+    }
+
+    button:active {
+        transform: scale(0.98);
+    }
+
+    button:disabled {
+        opacity: .35;
+        cursor: not-allowed;
+    }
+
+/* radio pill toggle */
+.radio-group {
+    display: flex;
+    gap: 0;
+    border: 0.5px solid var(--border-muted);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+    .radio-group input[type=radio] {
+        display: none;
+    }
+
+    .radio-group label {
+        font-size: 12px;
+        padding: 5px 12px;
+        cursor: pointer;
+        color: var(--text-secondary);
+        background: transparent;
+        transition: background .15s, color .15s;
+        white-space: nowrap;
+    }
+
+        .radio-group label:not(:last-of-type) {
+            border-right: 0.5px solid var(--border-muted);
+        }
+
+    .radio-group input[type=radio]:checked + label {
+        background: var(--bg-ui-active);
+        color: var(--text-on-active);
+        font-weight: 500;
+    }
+
+/* stat cards */
+.sc {
+    background: var(--bg-surface);
+    border-radius: 8px;
+    padding: 10px 14px;
+    flex: 1;
+    min-width: 78px;
+}
+
+.sl {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin: 0 0 3px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.sv {
+    font-size: 20px;
+    font-weight: 500;
+    margin: 0;
+    font-family: monospace;
+    color: var(--text-primary);
+}
+
+/* trial box, fixed height so layout never jumps */
+.trial-box {
+    background: var(--bg-surface);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    height: 152px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.trial-box-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin: 0 0 7px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    flex-shrink: 0;
+}
+
+.trial-placeholder {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+/* coin sequence area: fixed height = 3 rows of 24px coins + 2x3px gaps */
+#e_cs {
+    height: 78px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.trial-result {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 6px 0 0;
+    height: 16px;
+    overflow: hidden;
+    font-family: monospace;
+    flex-shrink: 0;
+}
+/* flip stat card sub-detail, justified flex so values always fill one line evenly */
+.flip-detail {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    font-family: monospace;
+    margin-top: 2px;
+}
+
+/* scrollbar styling for the chart container */
+#e_cw::-webkit-scrollbar {
+    height: 4px;
+}
+
+#e_cw::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#e_cw::-webkit-scrollbar-thumb {
+    background: var(--border-muted);
+    border-radius: 2px;
+}
+
+    #e_cw::-webkit-scrollbar-thumb:hover {
+        background: var(--text-muted);
+    }
+
+#e_cw {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-muted) transparent;
+}
+
+/* coins */
+.coin {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: 500;
+    font-family: monospace;
+    flex-shrink: 0;
+}
+
+    .coin.H {
+        background: var(--coin-h-bg);
+        color: var(--coin-h-text);
+        border: 1px solid var(--coin-h-border);
+    }
+
+    .coin.T {
+        background: var(--coin-t-bg);
+        color: var(--coin-t-text);
+        border: 1px solid var(--coin-t-border);
+    }
+
+    .coin.H.final {
+        background: var(--coin-final-bg);
+        color: var(--coin-final-text);
+        border-color: var(--coin-final-border);
+    }
+
+/* controls row */
+.ctrl-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.speed-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+/* legend */
+.li {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--text-secondary);
+}

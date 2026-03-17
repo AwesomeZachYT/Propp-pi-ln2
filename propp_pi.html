@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Propp π Coin Simulator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h2 style="font-size:18px;font-weight:500;margin-bottom:1rem">Propp π / ln 2 Coin Simulator</h2>
+    <p class="desc">
+        Toss a coin until heads outnumber tails by a chosen surplus. Record <em>heads/flips</em>. Repeat. The average converges to a constant that depends on the surplus: odd surpluses involve π, even surpluses involve <i>ln 2</i>.
+        <a href="https://arxiv.org/abs/2602.14487">(Propp, arXiv:2602.14487)</a>
+    </p>
+    <!-- stat cards -->
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+        <div class="sc">
+            <p class="sl" id="lbl-estimate">Estimate</p>
+            <p class="sv" id="e_pi" style="color:var(--color-pi-value)">—</p>
+        </div>
+        <div class="sc">
+            <p class="sl" id="lbl-true">True value</p>
+            <p class="sv" id="e_tv" style="color:var(--color-true-pi)">3.14159</p>
+        </div>
+        <div class="sc">
+            <p class="sl">Trials</p>
+            <p class="sv" id="e_tc">0</p>
+        </div>
+        <div class="sc">
+            <p class="sl">Error</p>
+            <p class="sv" id="e_er">—</p>
+        </div>
+        <div class="sc">
+            <p class="sl">Current Flips</p>
+            <p class="sv" id="e_fl">—</p>
+        </div>
+        <div class="sc">
+            <p class="sl">Resets</p>
+            <p class="sv" id="e_rs">0</p>
+        </div>
+    </div>
+    <!-- trial coin display -->
+    <div class="trial-box">
+        <p class="trial-box-label">current trial</p>
+        <div id="e_cs" style="display:flex;flex-wrap:wrap;gap:3px;align-items:flex-start;align-content:flex-start">
+            <span class="trial-placeholder">Press run to start</span>
+        </div>
+        <p id="e_tr" class="trial-result"></p>
+    </div>
+    <!-- controls row 1: trials, max flips, speed, buttons -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:5px">
+            <label class="ctrl-label" for="e_ni">Trials</label>
+            <input type="number" id="e_ni" value="200" min="1" max="10000" style="width:68px">
+        </div>
+        <div style="display:flex;align-items:center;gap:5px">
+            <label class="ctrl-label" for="e_mf">Max Flips</label>
+            <input type="number" id="e_mf" value="0" min="0" max="1000000" style="width:68px" title="0 = no limit">
+        </div>
+        <div style="display:flex;align-items:center;gap:5px">
+            <span class="speed-label">Step</span>
+            <input type="range" id="e_sp" min="0" max="4" value="2" step="1" style="width:80px">
+            <span class="speed-label">Instant</span>
+        </div>
+        <button id="e_rb">Run</button>
+        <button id="e_sb">One Trial</button>
+        <button id="e_fb">Reset Trial</button>
+        <button id="e_ab">Reset All</button>
+    </div>
+    <!-- controls row 2: surplus, multiplier, constant toggle -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:5px">
+            <label class="ctrl-label" for="e_sur" title="Stop when heads exceed tails by this many">Surplus</label>
+            <input type="number" id="e_sur" value="1" min="1" max="20" style="width:52px" title="Stop when heads exceed tails by this many">
+        </div>
+        <div style="display:flex;align-items:center;gap:5px">
+            <label class="ctrl-label" for="e_mul" title="Multiply average ratio by this to get the constant estimate">Multiplier</label>
+            <input type="number" id="e_mul" value="4" min="0.001" max="1000" step="any" style="width:68px" title="Multiply average ratio by this to get the constant estimate">
+        </div>
+        <div style="display:flex;align-items:center;gap:5px">
+            <span class="ctrl-label">Constant:</span>
+            <div class="radio-group">
+                <input type="radio" name="const" id="r_pi" value="pi" checked>
+                <label for="r_pi">π</label>
+                <input type="radio" name="const" id="r_ln2" value="ln2">
+                <label for="r_ln2">ln 2</label>
+            </div>
+        </div>
+    </div>
+    <!-- legend -->
+    <div style="display:flex;gap:12px;margin-bottom:6px;flex-wrap:wrap">
+        <div class="li"><span style="width:18px;height:2px;background:var(--color-estimate);display:inline-block;border-radius:2px"></span>Running Estimate</div>
+        <div class="li"><span style="width:8px;height:8px;border-radius:50%;background:var(--color-trial-dot);display:inline-block"></span>Trial × Multiplier</div>
+        <div class="li"><span style="width:18px;border-top:2px dashed var(--color-pi-line);display:inline-block"></span>True Constant</div>
+        <div class="li"><span style="width:2px;height:14px;border-left:2px dotted var(--color-reset-line);display:inline-block"></span>Reset</div>
+    </div>
+    <!-- chart -->
+    <div id="e_cw" style="overflow-x:auto;width:100%;-webkit-overflow-scrolling:touch;cursor:grab">
+        <div id="e_cc" style="position:relative;height:260px;min-width:100%">
+            <canvas id="e_pc"></canvas>
+        </div>
+    </div>
+    <!-- import panel -->
+    <div style="margin-top:14px;padding:10px 12px;background:var(--bg-surface);border-radius:8px;">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px">
+            <span class="ctrl-label" style="font-weight:500">Import sequence</span>
+            <div class="radio-group">
+                <input type="radio" name="imode" id="im_file" value="file" checked><label for="im_file">File</label>
+                <input type="radio" name="imode" id="im_text" value="text"><label for="im_text">Text</label>
+            </div>
+            <span style="font-size:11px;color:var(--text-muted)">Accepts H/T or 1/0, all other characters are ignored</span>
+        </div>
+        <!-- file mode -->
+        <div id="imp_file_row" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <input type="file" id="imp_file" accept=".txt,text/plain" style="display:none">
+            <button id="imp_browse">Choose file</button>
+            <span id="imp_fname" style="font-size:12px;color:var(--text-secondary)">No file chosen</span>
+            <button id="imp_run" disabled style="margin-left:auto">Run import</button>
+            <span id="imp_msg" style="font-size:11px;color:var(--text-secondary)"></span>
+        </div>
+        <!-- text mode -->
+        <div id="imp_text_row" style="display:none;flex-direction:column;gap:8px">
+            <textarea id="imp_ta" rows="4" placeholder="Paste or type your sequence here: H T H H T 1 0 1 …" style="width:100%;font-family:monospace;font-size:12px;padding:6px 8px;background:var(--bg-input);color:var(--text-primary);border:0.5px solid var(--border-muted);border-radius:6px;resize:vertical;line-height:1.5"></textarea>
+            <div style="display:flex;align-items:center;gap:10px">
+                <button id="imp_run_t">Run import</button>
+                <span id="imp_msg_t" style="font-size:11px;color:var(--text-secondary)"></span>
+            </div>
+        </div>
+    </div>
+    <!-- export panel -->
+    <div style="margin-top:14px;padding:10px 12px;background:var(--bg-surface);border-radius:8px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <span class="ctrl-label" style="font-weight:500">Export</span>
+        <div class="radio-group" id="fmt-group">
+            <input type="radio" name="fmt" id="f_csv" value="csv" checked><label for="f_csv">CSV</label>
+            <input type="radio" name="fmt" id="f_json" value="json"><label for="f_json">JSON</label>
+            <input type="radio" name="fmt" id="f_xml" value="xml"><label for="f_xml">XML</label>
+            <input type="radio" name="fmt" id="f_xlsx" value="xlsx"><label for="f_xlsx">XLSX</label>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+            <span class="ctrl-label">Include:</span>
+            <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--text-secondary);cursor:pointer">
+                <input type="checkbox" id="inc_pi" checked> π
+            </label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:12px;color:var(--text-secondary);cursor:pointer">
+                <input type="checkbox" id="inc_ln2"> ln 2
+            </label>
+        </div>
+        <button id="e_dl" style="margin-left:auto">Download</button>
+        <span id="dl_msg" style="font-size:11px;color:var(--text-secondary)"></span>
+    </div>
+    <!-- information paragraph -->
+    <p class="desc" style="margin-top: 20px">Propp, J., first publicized this phenomenon in February of 2026 in a preprint on arXiv titled
+        <i><a href="https://arxiv.org/abs/2602.14487">Estimating π with a Coin</a></i>, though he links to <a href="https://arxiv.org/abs/2504.06817">an earlier article</a>
+    by Gerhold, S., and Hubalek, F., where they derive the same proof. Unfortunately, I'm not knowledgable enough to give a detailed and sophisticated explanation of the proof
+    described by Propp, and it's too complicated to cram into a single paragraph regardless. You can check out Propp's preprint for information about the proof, as well as
+    <a href="https://youtu.be/kahGSss6SsU?si=EtxEL-FBeKwoEgiV">Matt Parker's video</a> on the matter, though neither gives a full and in-depth explanation on the context needed to truly understand the proof, so I do advise
+    doing your own research on certain parts.</p>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
